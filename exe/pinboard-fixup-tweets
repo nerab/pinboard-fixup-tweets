@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+
+require 'logger'
+require 'English'
+require 'pinboard'
+
+require 'pinboard-fixup-tweets/repository'
+require 'pinboard-fixup-tweets/stats'
+include PinboardFixupTweets
+
+def setup_logger
+  logger = Logger.new(STDERR)
+  logger.progname = File.basename(__FILE__)
+  desired_log_level = ENV.fetch('LOG_LEVEL', 'INFO')
+
+  begin
+    logger.level = Logger::Severity.const_get(desired_log_level)
+  rescue NameError
+    logger.level = Logger::Severity::WARN
+    logger.warn("Error evaluating log level #{desired_log_level}. Using #{Logger::Severity.constants[logger.level]} instead.")
+  end
+
+  logger
+end
+
+logger = setup_logger
+
+pinboard_api_token = ENV['PINBOARD_API_TOKEN']
+if pinboard_api_token
+  pinboard = Pinboard::Client.new(token: pinboard_api_token)
+  logger.info "Logged on to Pinboard as #{pinboard_api_token.split(':').first}"
+else
+  logger.error 'Pinboard API token missing.'
+  exit 1
+end
+
+repository = PinboardFixupTweets::Repository.new
+
+posts = pinboard.posts(meta: true)
+logger.info "Processing #{posts.size} bookmarks"
+
+stats = Stats.new
+stats.gauge(:total, posts.size)
+
+posts.each do |post|
+  begin
+    md = %r(^https://twitter.com/\w+/status/(?<id>\d{5,})).match(post.href)
+
+    unless md
+      stats.increment(:not_applicable)
+      next
+    end
+
+    tweet = repository.tweet(md[:id])
+    screen_name = "@#{tweet.user.screen_name}"
+
+    tags = post.tag
+    tags << 'twitter' unless tags.include?('twitter')
+    tags << 'pinboard-fixup-tweets' unless tags.include?('pinboard-fixup-tweets')
+    tags << screen_name unless tags.include?(screen_name)
+
+    pinboard.add(
+      url: post.href,
+      description: tweet.text,
+      extended: post.extended,
+      tags: tags,
+      replace: 'yes',
+      shared: post.shared ? post.shared : 'yes',
+      toread: post.toread
+    )
+
+    logger.info "Updated #{post.href} with title: #{tweet.text}"
+    stats.increment(:updated)
+  rescue
+    stats.increment(:errors)
+    logger.error "#{post.href} #{$ERROR_INFO.message}"
+  end
+end
+
+logger.info "Done: #{stats}"
