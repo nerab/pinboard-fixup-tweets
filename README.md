@@ -30,7 +30,7 @@ Optionally, you can build the image manually:
 ## Generate the run helper
 
 * Install `lpass`
-* Generate the deployment script `scripts/generate-deployment-script > scripts/run.sh`
+* Generate the deployment script `scripts/generate-run-script > scripts/run.sh`
 
 If desired, you may run the container manually:
 
@@ -38,8 +38,6 @@ If desired, you may run the container manually:
         --env PINBOARD_API_TOKEN=******** \
         --env TWITTER_CONSUMER_KEY=******** \
         --env TWITTER_CONSUMER_SECRET=******** \
-        --env TWITTER_OAUTH_TOKEN=******** \
-        --env TWITTER_OAUTH_TOKEN_SECRET=******** \
         --name pinboard-fixup-tweets \
         nerab/pinboard-fixup-tweets
 
