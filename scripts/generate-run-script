@@ -14,7 +14,7 @@ puts ERB.new(DATA.read).result
 __END__
 #!/bin/sh
 
-docker run \
+docker run --rm \
     --env TWITTER_CONSUMER_KEY=<%= TWITTER_CONSUMER_KEY %> \
     --env TWITTER_CONSUMER_SECRET=<%= TWITTER_CONSUMER_SECRET %> \
     --env PINBOARD_API_TOKEN=<%= PINBOARD_API_TOKEN %> \
