@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 require 'erb'
 require 'yaml'
 
 `lpass sync`
 
-YAML.load(`lpass show pinboard-fixup-tweets --notes`).each do |k, v|
+YAML.safe_load(`lpass show pinboard-fixup-tweets --notes`).each do |k, v|
   Object.const_set(k, v)
 end
 

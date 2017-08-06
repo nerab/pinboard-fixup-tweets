@@ -10,6 +10,7 @@ require 'pinboard-fixup-tweets/repository'
 require 'pinboard-fixup-tweets/stats'
 include PinboardFixupTweets
 
+# rubocop:disable Metrics/MethodLength
 def setup_logger
   logger = Logger.new(STDERR)
   logger.progname = File.basename(__FILE__)
@@ -19,7 +20,8 @@ def setup_logger
     logger.level = Logger::Severity.const_get(desired_log_level)
   rescue NameError
     logger.level = Logger::Severity::WARN
-    logger.warn("Error evaluating log level #{desired_log_level}. Using #{Logger::Severity.constants[logger.level]} instead.")
+    logger.warn("Error evaluating log level #{desired_log_level}." \
+                "Using #{Logger::Severity.constants[logger.level]} instead.")
   end
 
   logger
@@ -44,6 +46,7 @@ logger.info "Processing #{posts.size} bookmarks"
 stats = Stats.new
 stats.gauge(:total, posts.size)
 
+# rubocop:disable Metrics/BlockLength
 posts.each do |post|
   begin
     md = %r(^https://twitter.com/\w+/status/(?<id>\d{5,})).match(post.href)
