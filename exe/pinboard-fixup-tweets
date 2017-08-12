@@ -3,7 +3,6 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
 require 'logger'
-require 'English'
 require 'pinboard'
 
 require 'pinboard-fixup-tweets/repository'
@@ -76,9 +75,14 @@ posts.each do |post|
 
     logger.info "Updated #{post.href} with title: #{tweet.text}"
     stats.increment(:updated)
-  rescue
+  rescue Twitter::Error::TooManyRequests => error
+    logger.warn "Ouch! We hit Twitter's rate limit. Need to sleep until #{error.rate_limit.reset_at} before we can try again."
+    stats.increment(:rate_limited)
+    sleep error.rate_limit.reset_in + 1
+    retry
+  rescue => error
     stats.increment(:errors)
-    logger.error "#{post.href} #{$ERROR_INFO.message}"
+    logger.error "Could not handle #{post.href}: #{error.class} - #{error.message}"
   end
 end
 
