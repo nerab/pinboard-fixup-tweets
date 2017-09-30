@@ -75,6 +75,9 @@ posts.each do |post|
 
     logger.info "Updated #{post.href} with title: #{tweet.text}"
     stats.increment(:updated)
+  rescue Twitter::Error::Forbidden => error
+    warn error.message
+    exit 2
   rescue Twitter::Error::TooManyRequests => error
     logger.warn "Ouch! We hit Twitter's rate limit. Need to sleep until #{error.rate_limit.reset_at} before we can try again."
     stats.increment(:rate_limited)
