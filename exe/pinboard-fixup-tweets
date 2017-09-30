@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
+
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
 require 'logger'
@@ -46,6 +47,7 @@ stats = Stats.new
 stats.gauge(:total, posts.size)
 
 # rubocop:disable Metrics/BlockLength
+# rubocop:disable Lint/RescueWithoutErrorClass
 posts.each do |post|
   begin
     md = %r(^https://twitter.com/\w+/status/(?<id>\d{5,})).match(post.href)
@@ -75,16 +77,14 @@ posts.each do |post|
 
     logger.info "Updated #{post.href} with title: #{tweet.text}"
     stats.increment(:updated)
-  rescue Twitter::Error::Forbidden => error
-    warn error.message
-    exit 2
   rescue Twitter::Error::TooManyRequests => error
-    logger.warn "Ouch! We hit Twitter's rate limit. Need to sleep until #{error.rate_limit.reset_at} before we can try again."
-    stats.increment(:rate_limited)
+    logger.warn "Ouch! We hit Twitter's rate limit. " \
+                "Need to sleep until #{error.rate_limit.reset_at} before we can try again."
+    stats.increment(error.class.name)
     sleep error.rate_limit.reset_in + 1
     retry
   rescue => error
-    stats.increment(:errors)
+    stats.increment(error.class.name)
     logger.error "Could not handle #{post.href}: #{error.class} - #{error.message}"
   end
 end
