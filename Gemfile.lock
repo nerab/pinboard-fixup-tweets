@@ -152,6 +152,7 @@ DEPENDENCIES
   rerun
   rspec
   rubocop
+  ruby-progressbar
   twitter
   webmock
 

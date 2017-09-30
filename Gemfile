@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'pinboard'
+gem 'ruby-progressbar'
 gem 'twitter'
 
 group 'development' do

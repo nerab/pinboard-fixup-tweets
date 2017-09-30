@@ -5,6 +5,7 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
 require 'logger'
 require 'pinboard'
+require 'ruby-progressbar'
 
 require 'pinboard-fixup-tweets/repository'
 require 'pinboard-fixup-tweets/stats'
@@ -46,6 +47,8 @@ logger.info "Processing #{posts.size} bookmarks"
 stats = Stats.new
 stats.gauge(:total, posts.size)
 
+progressbar = ProgressBar.create(total: posts.size)
+
 # rubocop:disable Metrics/BlockLength
 # rubocop:disable Lint/RescueWithoutErrorClass
 posts.each do |post|
@@ -86,6 +89,8 @@ posts.each do |post|
   rescue => error
     stats.increment(error.class.name)
     logger.error "Could not handle #{post.href}: #{error.class} - #{error.message}"
+  ensure
+    progressbar.increment
   end
 end
 
