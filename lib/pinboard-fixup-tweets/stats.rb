@@ -47,23 +47,28 @@ module PinboardFixupTweets
     end
 
     def increment(name)
-      @counters[name].increment
+      @counters[name.to_s].increment
     end
 
     def counter(name)
-      @counters[name].value
+      @counters[name.to_s].value
     end
 
     def gauge(name, value = nil)
       if value
-        @gauges[name].update(value)
+        @gauges[name.to_s].update(value)
       else
-        @gauges[name].value
+        @gauges[name.to_s].value
       end
     end
 
     def to_s
-      (@counters.values + @gauges.values).sort_by(&:name).join(', ')
+      all = @counters.values + @gauges.values
+      if all.empty?
+        'No data was recorded.'
+      else
+        all.sort_by(&:name).join(', ')
+      end
     end
   end
 end
