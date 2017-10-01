@@ -29,6 +29,16 @@ def setup_logger
 end
 
 logger = setup_logger
+stats = Stats.new
+
+trap('INFO') do
+  warn stats
+end
+
+trap('INT') do
+  warn "Interrupted. #{stats}"
+  exit 1
+end
 
 pinboard_api_token = ENV['PINBOARD_API_TOKEN']
 if pinboard_api_token
@@ -43,8 +53,6 @@ repository = PinboardFixupTweets::Repository.new
 
 posts = pinboard.posts(meta: true)
 logger.info "Processing #{posts.size} bookmarks"
-
-stats = Stats.new
 stats.gauge(:total, posts.size)
 
 progressbar = ProgressBar.create(total: posts.size)
@@ -94,4 +102,4 @@ posts.each do |post|
   end
 end
 
-logger.info "Done: #{stats}"
+logger.info "Done. #{stats}"
