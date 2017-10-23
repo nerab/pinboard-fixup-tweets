@@ -1,5 +1,7 @@
 # Fixup titles of Pinboard-bookmarked tweets
 
+[![Build Status](https://travis-ci.org/nerab/pinboard-fixup-tweets.svg?branch=master)](https://travis-ci.org/nerab/pinboard-fixup-tweets)
+
 Pinboard archives my favorited tweets, but I don't like the titles. This project fixes them:
 
 * Fetch all pinboard bookmarks that are tweets
