@@ -76,7 +76,7 @@ GEM
       pry (~> 0.10)
     public_suffix (3.0.1)
     rack (2.0.3)
-    rack-test (0.7.0)
+    rack-test (0.8.0)
       rack (>= 1.0, < 3)
     rainbow (2.2.2)
       rake
