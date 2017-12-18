@@ -31,8 +31,10 @@ end
 logger = setup_logger
 stats = Stats.new
 
-trap('INFO') do
-  warn stats
+if Signal.list['INFO']
+  trap('INFO') do
+    warn stats
+  end
 end
 
 trap('INT') do
