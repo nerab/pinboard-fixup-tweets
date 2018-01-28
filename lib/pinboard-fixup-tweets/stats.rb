@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'time'
 
 module PinboardFixupTweets
   class Stats
@@ -12,6 +13,10 @@ module PinboardFixupTweets
 
       def to_s
         "#{@name}: #{@value}"
+      end
+
+      def to_json(*_args)
+        JSON.generate(@name => @value)
       end
 
       protected
@@ -41,7 +46,9 @@ module PinboardFixupTweets
       end
     end
 
-    def initialize
+    def initialize(title = '')
+      @title = title
+      @created_at = Time.now
       @counters = Hash.new { |stats, name| stats[name] = Counter.new(name) }
       @gauges = Hash.new { |stats, name| stats[name] = Gauge.new(name) }
     end
@@ -62,12 +69,25 @@ module PinboardFixupTweets
       end
     end
 
+    def to_json
+      finished_at = Time.now
+
+      {
+        title: @title,
+        created_at: @created_at.iso8601,
+        finished_at: finished_at.iso8601,
+        elapsed_time_in_seconds: finished_at - @created_at,
+        counters: @counters.values,
+        gauges: @gauges.values
+      }.to_json
+    end
+
     def to_s
       all = @counters.values + @gauges.values
       if all.empty?
-        'No data was recorded.'
+        "#{@title}: No data was recorded."
       else
-        all.sort_by(&:name).join(', ')
+        @title << ': ' << all.sort_by(&:name).join(', ')
       end
     end
   end

@@ -54,5 +54,10 @@ RSpec.describe PinboardFixupTweets::Stats do
     it 'provides a string summary' do
       expect(subject.to_s).to eq('Outer::Inner: 4, bar: 2, foo: 3')
     end
+
+    it 'provides a JSON summary' do
+      warn subject.to_json
+      expect(subject.to_json).to eq('{"Outer::Inner": 4, "bar": 2, "foo": 3}')
+    end
   end
 end
