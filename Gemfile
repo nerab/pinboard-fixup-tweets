@@ -19,5 +19,6 @@ group 'development' do
   gem 'rerun'
   gem 'rspec'
   gem 'rubocop'
+  gem 'timecop'
   gem 'webmock'
 end

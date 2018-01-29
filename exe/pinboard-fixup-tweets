@@ -6,10 +6,10 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'logger'
 require 'pinboard'
 require 'ruby-progressbar'
+require 'optparse'
 
 require 'pinboard-fixup-tweets/repository'
 require 'pinboard-fixup-tweets/stats'
-include PinboardFixupTweets
 
 # rubocop:disable Metrics/MethodLength
 def setup_logger
@@ -27,9 +27,19 @@ def setup_logger
 
   logger
 end
+# rubocop:enable Metrics/MethodLength
 
 logger = setup_logger
-stats = Stats.new
+format = nil
+
+OptionParser.new do |opts|
+  opts.on('--stats-format=FORMAT', 'Output format. Determines the FORMAT in which stats are printed.') do |f|
+    logger.info "Printing stats in #{f} format"
+    format = f
+  end
+end.parse!
+
+stats = PinboardFixupTweets::Stats.new(File.basename($PROGRAM_NAME))
 
 if Signal.list['INFO']
   trap('INFO') do
@@ -57,51 +67,55 @@ posts = pinboard.posts(meta: true)
 logger.info "Processing #{posts.size} bookmarks"
 stats.gauge(:total, posts.size)
 
-progressbar = ProgressBar.create(total: posts.size)
+progressbar = ProgressBar.create(total: posts.size, output: $stderr)
 
 # rubocop:disable Metrics/BlockLength
-# rubocop:disable Lint/RescueWithoutErrorClass
 posts.each do |post|
-  begin
-    md = %r(^https://twitter.com/\w+/status/(?<id>\d{5,})).match(post.href)
+  md = %r(^https://twitter.com/\w+/status/(?<id>\d{5,})).match(post.href)
 
-    unless md
-      stats.increment(:not_applicable)
-      next
-    end
-
-    tweet = repository.tweet(md[:id])
-    screen_name = "@#{tweet.user.screen_name}"
-
-    tags = post.tag
-    tags << 'twitter' unless tags.include?('twitter')
-    tags << 'pinboard-fixup-tweets' unless tags.include?('pinboard-fixup-tweets')
-    tags << screen_name unless tags.include?(screen_name)
-
-    pinboard.add(
-      url: post.href,
-      description: tweet.text,
-      extended: post.extended,
-      tags: tags,
-      replace: 'yes',
-      shared: post.shared ? post.shared : 'yes',
-      toread: post.toread
-    )
-
-    logger.info "Updated #{post.href} with title: #{tweet.text}"
-    stats.increment(:updated)
-  rescue Twitter::Error::TooManyRequests => error
-    logger.warn "Ouch! We hit Twitter's rate limit. " \
-                "Need to sleep until #{error.rate_limit.reset_at} before we can try again."
-    stats.increment(error.class.name)
-    sleep error.rate_limit.reset_in + 1
-    retry
-  rescue => error
-    stats.increment(error.class.name)
-    logger.error "Could not handle #{post.href}: #{error.class} - #{error.message}"
-  ensure
-    progressbar.increment
+  unless md
+    stats.increment(:not_applicable)
+    next
   end
-end
 
-logger.info "Done. #{stats}"
+  tweet = repository.tweet(md[:id])
+  screen_name = "@#{tweet.user.screen_name}"
+
+  tags = post.tag
+  tags << 'twitter' unless tags.include?('twitter')
+  tags << 'pinboard-fixup-tweets' unless tags.include?('pinboard-fixup-tweets')
+  tags << screen_name unless tags.include?(screen_name)
+
+  pinboard.add(
+    url: post.href,
+    description: tweet.text,
+    extended: post.extended,
+    tags: tags,
+    replace: 'yes',
+    shared: post.shared ? post.shared : 'yes',
+    toread: post.toread
+  )
+
+  logger.info "Updated #{post.href} with title: #{tweet.text}"
+  stats.increment(:updated)
+rescue Twitter::Error::TooManyRequests => error
+  logger.warn "Ouch! We hit Twitter's rate limit. " \
+              "Need to sleep until #{error.rate_limit.reset_at} before we can try again."
+  stats.increment(error.class.name)
+  sleep error.rate_limit.reset_in + 1
+  retry
+rescue StandardError => error
+  stats.increment(error.class.name)
+  logger.error "Could not handle #{post.href}: #{error.class} - #{error.message}"
+ensure
+  progressbar.increment
+end
+# rubocop:enable Metrics/BlockLength
+
+logger.info 'Done'
+
+if format == 'json'
+  puts stats.to_json
+else
+  puts stats.to_s
+end
