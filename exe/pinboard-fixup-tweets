@@ -31,13 +31,28 @@ end
 
 logger = setup_logger
 format = nil
+limit = Float::INFINITY
 
-OptionParser.new do |opts|
-  opts.on('--stats-format=FORMAT', 'Output format. Determines the FORMAT in which stats are printed.') do |f|
-    logger.info "Printing stats in #{f} format"
-    format = f
-  end
-end.parse!
+begin
+  OptionParser.new do |opts|
+    opts.on('-f', '--stats-format=FORMAT', 'Output format. Determines the FORMAT in which stats are printed.') do |f|
+      logger.info "Printing stats in #{f} format"
+      format = f
+    end
+    opts.on('-l', '--limit=NUMBER', OptionParser::DecimalInteger, 'Limit the number of processed posts by NUMBER') do |l|
+      if l <= 0
+        warn 'Error: Limit must be > 0'
+        exit 1
+      end
+
+      logger.warn "Processing will be limited to the first #{l} posts"
+      limit = l
+    end
+  end.parse!
+rescue => e
+  warn "Error: #{e.message}"
+  exit 1
+end
 
 stats = PinboardFixupTweets::Stats.new(File.basename($PROGRAM_NAME))
 
@@ -53,6 +68,7 @@ trap('INT') do
 end
 
 pinboard_api_token = ENV['PINBOARD_API_TOKEN']
+
 if pinboard_api_token
   pinboard = Pinboard::Client.new(token: pinboard_api_token)
   logger.info "Logged on to Pinboard as #{pinboard_api_token.split(':').first}"
@@ -62,15 +78,16 @@ else
 end
 
 repository = PinboardFixupTweets::Repository.new
-
 posts = pinboard.posts(meta: true)
-logger.info "Processing #{posts.size} bookmarks"
 stats.gauge(:total, posts.size)
+limit = [limit, posts.size].min
+stats.gauge(:limit, limit)
+logger.info "Processing #{limit} bookmarks"
 
-progressbar = ProgressBar.create(total: posts.size, output: $stderr)
+progressbar = ProgressBar.create(total: limit, output: $stderr)
 
 # rubocop:disable Metrics/BlockLength
-posts.each do |post|
+posts.first(limit).each do |post|
   md = %r(^https://twitter.com/\w+/status/(?<id>\d{5,})).match(post.href)
 
   unless md
