@@ -35,11 +35,17 @@ limit = Float::INFINITY
 
 begin
   OptionParser.new do |opts|
-    opts.on('-f', '--stats-format=FORMAT', 'Output format. Determines the FORMAT in which stats are printed.') do |f|
+    opts.on('-f',
+            '--stats-format=FORMAT',
+            'Output format. Determines the FORMAT in which stats are printed.') do |f|
       logger.info "Printing stats in #{f} format"
       format = f
     end
-    opts.on('-l', '--limit=NUMBER', OptionParser::DecimalInteger, 'Limit the number of processed posts by NUMBER') do |l|
+
+    opts.on('-l',
+            '--limit=NUMBER',
+            OptionParser::DecimalInteger,
+            'Limit the number of processed posts by NUMBER') do |l|
       if l <= 0
         warn 'Error: Limit must be > 0'
         exit 1
@@ -49,7 +55,7 @@ begin
       limit = l
     end
   end.parse!
-rescue => e
+rescue StandardError => e
   warn "Error: #{e.message}"
   exit 1
 end

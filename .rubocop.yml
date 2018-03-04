@@ -1,9 +1,13 @@
 AllCops:
+  TargetRubyVersion: 2.5
   Exclude:
     - 'vendor/**/*'
     - 'test/support/**/*'
 
   DisplayCopNames: true
+
+  DisplayStyleGuide:
+    Enabled: true
 
 Documentation:
   Enabled: false
