@@ -14,6 +14,8 @@ Pinboard archives my favorited tweets, but I don't like the titles. This project
 
         $ export PINBOARD_API_TOKEN=********
 
+1. Likewise, get `TWITTER_CONSUMER_KEY` and `TWITTER_CONSUMER_SECRET` [from Twitter](https://apps.twitter.com/app/new) and export them as variables. This is required in order to deal with the query limit Twitter imposes.
+
 1. Run the tool:
 
         $ pinboard-fixup-tweets
