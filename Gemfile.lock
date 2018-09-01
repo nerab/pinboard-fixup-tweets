@@ -13,7 +13,7 @@ GEM
     domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
     equalizer (0.0.11)
-    ffi (1.9.23)
+    ffi (1.9.25)
     formatador (0.2.5)
     guard (2.14.2)
       formatador (>= 0.2.4)
