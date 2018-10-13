@@ -115,7 +115,7 @@ posts.first(limit).each do |post|
     extended: post.extended,
     tags: tags,
     replace: 'yes',
-    shared: post.shared ? post.shared : 'yes',
+    shared: post.shared || 'yes',
     toread: post.toread
   )
 
