@@ -121,15 +121,15 @@ posts.first(limit).each do |post|
 
   logger.info "Updated #{post.href} with title: #{tweet.text}"
   stats.increment(:updated)
-rescue Twitter::Error::TooManyRequests => error
+rescue Twitter::Error::TooManyRequests => e
   logger.warn "Ouch! We hit Twitter's rate limit. " \
-              "Need to sleep until #{error.rate_limit.reset_at} before we can try again."
-  stats.increment(error.class.name)
-  sleep error.rate_limit.reset_in + 1
+              "Need to sleep until #{e.rate_limit.reset_at} before we can try again."
+  stats.increment(e.class.name)
+  sleep e.rate_limit.reset_in + 1
   retry
-rescue StandardError => error
-  stats.increment(error.class.name)
-  logger.error "Could not handle #{post.href}: #{error.class} - #{error.message}"
+rescue StandardError => e
+  stats.increment(e.class.name)
+  logger.error "Could not handle #{post.href}: #{e.class} - #{e.message}"
 ensure
   progressbar.increment
 end

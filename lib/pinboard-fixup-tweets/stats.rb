@@ -70,7 +70,7 @@ module PinboardFixupTweets
       end
     end
 
-    def to_json
+    def to_json(*_args)
       finished_at = Time.now
 
       {
