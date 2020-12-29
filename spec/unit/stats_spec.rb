@@ -12,10 +12,12 @@ RSpec.describe PinboardFixupTweets::Stats do
     end
   end
 
+  # rubocop:disable Lint/ConstantDefinitionInBlock
   module Outer
     module Inner
     end
   end
+  # rubocop:enable Lint/ConstantDefinitionInBlock
 
   it 'provides a summary telling that there is no data' do
     expect(subject.to_s).to eq('Unit Test: No data was recorded.')

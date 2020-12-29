@@ -9,6 +9,9 @@ AllCops:
   DisplayStyleGuide:
     Enabled: true
 
+  NewCops: enable
+  SuggestExtensions: false
+
 Style/Documentation:
   Enabled: false
 

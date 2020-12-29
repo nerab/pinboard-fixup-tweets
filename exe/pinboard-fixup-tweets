@@ -13,7 +13,7 @@ require 'pinboard-fixup-tweets/stats'
 
 # rubocop:disable Metrics/MethodLength
 def setup_logger
-  logger = Logger.new(STDERR)
+  logger = Logger.new($stderr)
   logger.progname = File.basename(__FILE__)
   desired_log_level = ENV.fetch('LOG_LEVEL', 'INFO')
 

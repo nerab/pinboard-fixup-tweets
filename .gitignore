@@ -5,6 +5,7 @@
 .cache_rake_t
 .envrc
 .rake_t_cache
+.rake_tasks
 /.bundle/
 /.yardoc
 /_yardoc/
