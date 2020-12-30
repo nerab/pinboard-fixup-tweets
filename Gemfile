@@ -6,6 +6,7 @@ source 'https://rubygems.org'
 gem 'pinboard', git: 'https://github.com/nerab/pinboard.git', branch: 'update-for-ruby-3.0'
 
 gem 'ruby-progressbar'
+gem 'nokogiri'
 gem 'twitter'
 
 group 'development' do
