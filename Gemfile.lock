@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/nerab/pinboard.git
-  revision: 624821ae7a69ec1151bb1d58190cfa0648189f0c
+  revision: 2f630c2cacf31520d7e479775dd0a2ba3da473be
   branch: update-for-ruby-3.0
   specs:
     pinboard (1.1.0)
