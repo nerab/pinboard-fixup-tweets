@@ -101,7 +101,7 @@ GEM
     regexp_parser (2.0.3)
     rerun (0.13.1)
       listen (~> 3.0)
-    rexml (3.2.4)
+    rexml (3.2.5)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
       rspec-expectations (~> 3.10.0)
@@ -147,7 +147,7 @@ GEM
       unf_ext
     unf_ext (0.0.7.7)
     unicode-display_width (1.7.0)
-    webmock (3.11.0)
+    webmock (3.12.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
